@@ -7,8 +7,8 @@ clean: reset
 	rm -rf pmemkv_bench ./c/*.bin ./cpp/*.bin ./java/*.class
 
 bench: reset
-	g++ ./bench/db_bench.cc ./bench/port/port_posix.cc ./bench/util/env.cc ./bench/util/env_posix.cc ./bench/util/histogram.cc ./bench/util/logging.cc ./bench/util/status.cc ./bench/util/testutil.cc -o pmemkv_bench -I./bench/include -I./bench -I./bench/util -O2 -std=c++11 -DOS_LINUX -fno-builtin-memcmp -march=native -DNDEBUG -ldl -lpthread -lpmemkv
-	PMEM_IS_PMEM_FORCE=1 ./pmemkv_bench --db=/dev/shm/pmemkv --db_size_in_gb=1 --histogram=1
+	g++ ./bench/db_bench.cc ./bench/port/port_posix.cc ./bench/util/env.cc ./bench/util/env_posix.cc ./bench/util/histogram.cc ./bench/util/logging.cc ./bench/util/status.cc ./bench/util/testutil.cc -o pmemkv_bench -I./bench/include -I./bench -I./bench/util -I/home/wu45/work/Ribbon-High-Performance-Cache-Line-Flushing-for-Persistent-Memory-/pmemkv/src -O2 -std=c++11 -DOS_LINUX -fno-builtin-memcmp -march=native -DNDEBUG -ldl -lpthread -L/home/wu45/work/Ribbon-High-Performance-Cache-Line-Flushing-for-Persistent-Memory-/pmemkv/build -lpmemkv
+	PMEM_IS_PMEM_FORCE=1 ./pmemkv_bench --db=/mnt/pmem/pm0/kai/pmemkv --db_size_in_gb=1 --histogram=1
 	$(MAKE) reset
 
 baseline_c: reset

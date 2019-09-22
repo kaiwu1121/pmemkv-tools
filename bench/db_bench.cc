@@ -24,6 +24,7 @@
 #include "mutexlock.h"
 #include "random.h"
 #include "libpmemkv.hpp"
+//#include "config.h"
 
 static const std::string USAGE =
         "pmemkv_bench\n"
@@ -617,14 +618,32 @@ private:
 		assert(kv_ == NULL);
 		auto start = g_env->NowMicros();
 		auto size = 1024ULL * 1024ULL * 1024ULL * FLAGS_db_size_in_gb;
-		pmem::kv::config cfg;
+		//pmem::kv::internal::config cfg;
+		pmemkv_config *cfg = pmemkv_config_new();
+		assert(cfg != nullptr);
 
-		auto cfg_s = cfg.put_string("path", FLAGS_db);
-
-		if (cfg_s != pmem::kv::status::OK)
-			throw std::runtime_error("putting 'path' to config failed");
-
+		int ret = pmemkv_config_put_string(cfg, "path", FLAGS_db);
+        	assert(ret == PMEMKV_STATUS_OK);
+ 		
 		if (fresh_db) {
+			ret = pmemkv_config_put_uint64(cfg, "force_create", 1);
+        		assert(ret == PMEMKV_STATUS_OK);
+
+	 		ret = pmemkv_config_put_uint64(cfg, "size", size);
+        		assert(ret == PMEMKV_STATUS_OK);
+		}
+	
+		kv_ = new pmem::kv::db();
+        	assert(kv_ != nullptr);
+        	auto s = kv_->open(FLAGS_engine, cfg);
+        	assert(s == status::OK);
+
+//		auto cfg_s = cfg.put_string("path", FLAGS_db);
+
+//		if (cfg_s != pmem::kv::status::OK)
+//			throw std::runtime_error("putting 'path' to config failed");
+
+	/*	if (fresh_db) {
 			cfg_s = cfg.put_uint64("force_create", 1);
 			if (cfg_s != pmem::kv::status::OK)
 				throw std::runtime_error(
@@ -643,10 +662,10 @@ private:
 		if (s !=  pmem::kv::status::OK) {
 			fprintf(stderr,
 				"Cannot start engine (%s) for path (%s) with %i GB capacity\n%s\n\nUSAGE: %s",
-				FLAGS_engine, FLAGS_db, FLAGS_db_size_in_gb, pmem::kv::errormsg().c_str(),
+				FLAGS_engine, FLAGS_db, FLAGS_db_size_in_gb, pmem::kv::db::errormsg().c_str(),
 				USAGE.c_str());
 			exit(-42);
-		}
+		}*/
 
 		fprintf(stdout, "%-12s : %11.3f millis/op;\n", "open", ((g_env->NowMicros() - start) * 1e-3));
 	}
